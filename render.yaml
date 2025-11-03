@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: incognito-m-backend
+    env: node
+    plan: free
+    buildCommand: "cd packages/backend && npm ci && npm run build"
+    startCommand: "cd packages/backend && npm run start:prod"
+    repo: https://github.com/<your-org-or-user>/<repo>
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: incognito-m-frontend
+    env: node
+    plan: free
+    buildCommand: "cd packages/frontend && npm ci && npm run build"
+    startCommand: "cd packages/frontend && npm run start"
+    repo: https://github.com/<your-org-or-user>/<repo>
+    branch: main
+
+cronJobs:
+  - name: purge-expired-messages
+    schedule: "*/5 * * * *" # every 5 minutes
+    service: incognito-m-backend
+    path: /internal/cron/purge-expired
+    method: POST
+
+databases:
+  - name: incognito-m-db
+    engine: postgres
+    plan: starter
